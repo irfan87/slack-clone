@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import FiberManualRecordIcon from "@material-ui/icons/FiberManualRecord";
 import CreateIcon from "@material-ui/icons/Create";
@@ -15,9 +15,24 @@ import AddIcon from "@material-ui/icons/Add";
 
 import SidebarOption from "../SidebarOption/SidebarOption";
 
+import db from "../../firebaseConfig";
+
 import "./Sidebar.css";
 
 const Sidebar = () => {
+	const [channels, setChannels] = useState([]);
+
+	useEffect(() => {
+		db.collection("rooms").onSnapshot((snapshot) =>
+			setChannels(
+				snapshot.docs.map((doc) => ({
+					id: doc.id,
+					name: doc.data().name,
+				}))
+			)
+		);
+	}, []);
+
 	return (
 		<div className="sidebar">
 			<div className="sidebar__header">
@@ -41,8 +56,11 @@ const Sidebar = () => {
 			<hr />
 			<SidebarOption Icon={ExpandMoreIcon} title="Channels" />
 			<hr />
-			<SidebarOption Icon={AddIcon} title="Channels" />
+			<SidebarOption Icon={AddIcon} addChannelOption title="Add Channels" />
 			{/* connect to the db and list all the channels */}
+			{channels.map((channel) => (
+				<SidebarOption title={channel.name} id={channel.id} key={channel.id} />
+			))}
 		</div>
 	);
 };
